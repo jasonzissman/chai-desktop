@@ -1,0 +1,11 @@
+C:\Users\Jason\Documents\websites\launch-programs\bin\Debug\netcoreapp3.0\launch-programs.exe
+C:\Users\Jason\Documents\websites\launch-programs\bin\Debug\netcoreapp3.0\launch-programs.deps.json
+C:\Users\Jason\Documents\websites\launch-programs\bin\Debug\netcoreapp3.0\launch-programs.runtimeconfig.json
+C:\Users\Jason\Documents\websites\launch-programs\bin\Debug\netcoreapp3.0\launch-programs.runtimeconfig.dev.json
+C:\Users\Jason\Documents\websites\launch-programs\bin\Debug\netcoreapp3.0\launch-programs.dll
+C:\Users\Jason\Documents\websites\launch-programs\bin\Debug\netcoreapp3.0\launch-programs.pdb
+C:\Users\Jason\Documents\websites\launch-programs\obj\Debug\netcoreapp3.0\launch-programs.csprojAssemblyReference.cache
+C:\Users\Jason\Documents\websites\launch-programs\obj\Debug\netcoreapp3.0\launch-programs.AssemblyInfoInputs.cache
+C:\Users\Jason\Documents\websites\launch-programs\obj\Debug\netcoreapp3.0\launch-programs.AssemblyInfo.cs
+C:\Users\Jason\Documents\websites\launch-programs\obj\Debug\netcoreapp3.0\launch-programs.dll
+C:\Users\Jason\Documents\websites\launch-programs\obj\Debug\netcoreapp3.0\launch-programs.pdb
