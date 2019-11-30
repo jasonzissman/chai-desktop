@@ -1,13 +1,8 @@
-// pull in the required packages.
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const fs = require("fs");
 
-// replace with your own subscription key,
-// service region (e.g., "westus"), and
-// the name of the file you want to run
-// through the speech recognizer.
-const subscriptionKey = "YourSubscriptionKey";
-const serviceRegion = "YourServiceRegion"; // e.g., "westus"
+const subscriptionKey = "YourSubscriptionKey"; // TODO - read from command line arg
+const serviceRegion = "YourServiceRegion"; // TODO - read from command line arg, e.g., "westus"
 const filename = "YourAudioFile.wav"; // 16000 Hz, Mono
 
 // create the push stream we need for the speech sdk.
@@ -47,5 +42,6 @@ recognizer.recognizeOnceAsync(
 
         recognizer.close();
         recognizer = undefined;
-    });
+    }
+);
 
