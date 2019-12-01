@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jasonzissman/launch-programs#readme",
   "dependencies": {
+    "fs": "0.0.1-security",
     "mongodb": "^3.3.5"
   }
 }
