@@ -18,11 +18,15 @@ async function connectToDatabase(dbConnString) {
 }
 
 function executeTask(task) {
-  if (task && task.length > 0 && task.contains("crown") && task.contains("netflix")) {
+  if (!task || task.length < 1) {
+    return;
+  }
+  task = task.toLowerCase().trim();
+  if (task.indexOf("crown")>-1 && task.indexOf("netflix")>-1) {
     child_process.exec(process.argv[6].split("--crown=")[1], (error, stdout, stderr) => {
       logger.log(stdout);
     });
-  } else if (task && task.length > 0 && task.contains("hulu") && task.contains("burgers")) {
+  } else if (task.indexOf("hulu")>-1 && task.indexOf("burgers")>-1) {
     child_process.exec(process.argv[5].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
       logger.log(stdout);
     });
