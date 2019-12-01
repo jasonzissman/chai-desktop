@@ -1,0 +1,126 @@
+const Alexa = require('ask-sdk-core');
+
+const LaunchRequestHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Welcome to SmartFeed! Any command you give me will be made available through a REST API. Simply instruct Alexa to "tell smartfeed to open XYZ" and I\'ll add it to your feed. You can check your feed with the link that I send to your Alexa app.';
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
+const MongoClient = require('mongodb').MongoClient;
+let cachedDbClient = undefined;
+function connectToDatabase (uri) {
+
+  if (cachedDbClient) {
+    return Promise.resolve(cachedDbClient);
+  }
+
+  return MongoClient.connect(uri)
+    .then(db => {
+      cachedDbClient = db;
+      return cachedDbClient;
+    });
+}
+
+const AddToFeedIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AddToFeedIntent';
+    },
+    handle(handlerInput) {
+        //event.session.user.userId
+        const userId = handlerInput.requestEnvelope.session.user.userId;
+        const thingToOpen = handlerInput.requestEnvelope.request.intent.slots.thingToOpen.value;
+        const speakOutput = `OK!`;
+        
+        handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
+        const uri = "ENTER_HERE"; // SCRUBBED
+        connectToDatabase(uri).then((dbClient) => {
+            dbClient.db("smartfeed").collection("smartfeedItems").insertOne({
+                userId: userId,
+                thingToOpen: thingToOpen,
+                created: new Date().getTime(),
+                read: false
+            });
+            dbClient.close();
+
+        });
+        
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .getResponse();
+    }
+};
+const HelpIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Simply instruct Alexa to "tell smartfeed to open XYZ" and I\'ll add it to your feed. You can check your feed with the link that I send to your Alexa app.';
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+const CancelAndStopIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && (Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.CancelIntent'
+                || Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.StopIntent');
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Goodbye!';
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .getResponse();
+    }
+};
+const SessionEndedRequestHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'SessionEndedRequest';
+    },
+    handle(handlerInput) {
+        // Any cleanup logic goes here.
+        return handlerInput.responseBuilder.getResponse();
+    }
+};
+
+const ErrorHandler = {
+    canHandle() {
+        return true;
+    },
+    handle(handlerInput, error) {
+        console.log(`~~~~ Error handled: ${error.stack}`);
+        const speakOutput = `Sorry, I am having trouble handling requests. Please try again.`;
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
+// The SkillBuilder acts as the entry point for your skill, routing all request and response
+// payloads to the handlers above. Make sure any new handlers or interceptors you've
+// defined are included below. The order matters - they're processed top to bottom.
+exports.handler = Alexa.SkillBuilders.custom()
+    .addRequestHandlers(
+        LaunchRequestHandler,
+        AddToFeedIntentHandler,
+        HelpIntentHandler,
+        CancelAndStopIntentHandler,
+        SessionEndedRequestHandler
+    )
+    .addErrorHandlers(
+        ErrorHandler,
+    )
+    .lambda();

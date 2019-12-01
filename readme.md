@@ -1,15 +1,21 @@
 # launch-programs
-This is an attempt to use speech recognition to launch programs on my desktop. The end-game is to be able to say "Launch Bojack Horseman on Netflix" and have chrome open to Netflix with Bojack Horseman playing.
+This is one part of a suite of applications meant to facilitate deeper Alexa integration with your desktop PC. Alexa devices can be used to deliver commands that can be executed on a local computer. The net result will be the ability to control your PC with customizable commands like the following:
 
-## Basis of proof-of-concept
-We will use Azure Cognitive Services along with Azure's Node/JS SDK to accomplish "speech to text". See this tutorial: https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/quickstart/javascript/node/index.js
+    "Alexa, tell smart feed to open Bojack Horseman on Netflix."
 
-## Running the app
-Simply enter `npm install` and then `node index.js`
+    "Alexa, tell smart feed to open ESPN in Chrome."
 
-## Simple way to launch applications with Cortana
+    "Alexa, tell smart feed to shut down my computer".
 
-1. Create a batch file that can perform a task, such as launching chrome at specific URL.
-2. Create shortcut to that batch file and place here: C:\ProgramData\Microsoft\Windows\Start Menu\Programs
-3. Cortana can now invoke that shortcut
+# To do
 
+* Publish Skill
+* Write desktop application that looks for Alexa-assigned tasks
+* (stretch goal) update Skill to generate 6 digit ID instead of using Alexa userIDs. Also, update desktop app to use this ID instead of Alexa userID. [Allow multiple userIDs to be associated with one generated ID since different devices may have different alexa userIDs but be under the same person's control.]
+
+# Architecture
+
+- An Alexa skill will handle requests to perform tasks. The tasks will be free-form and following the pattern "Alexa, tell smart feed to open _______". 
+- The skill will insert an entry into a database with a unique identifier for that user as well as the captured command.
+- An agent on the end-user's PC will poll the database (or use websockets with push) and read any new entries for their configured userID.
+- The local agent will parse the task/entry per local rules defined by the local computer. For example - a task saying "open the crown on netflix" could map to a bash script that launches netflix at a URL which launches the Crown.
