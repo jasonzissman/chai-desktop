@@ -1,7 +1,7 @@
 # Idea
 Make an Aelxa skill that exposes command in REST API for a short time. For example:
 
-1. "Alexa, tell SmartFeed to turn on Netflix"
+1. "Alexa, tell chai to turn on Netflix"
 
 2. A object is stored in a datastore with content "turn on Netflix". It is associated with a specific user.
 

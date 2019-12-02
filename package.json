@@ -1,5 +1,5 @@
 {
-  "name": "launch-programs",
+  "name": "chai-desktop",
   "version": "1.0.0",
   "description": "An attempt to use speech recognition to launch programs",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jasonzissman/launch-programs.git"
+    "url": "git+https://github.com/jasonzissman/chai-desktop.git"
   },
   "author": "jason zissman",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jasonzissman/launch-programs/issues"
+    "url": "https://github.com/jasonzissman/chai-desktop/issues"
   },
-  "homepage": "https://github.com/jasonzissman/launch-programs#readme",
+  "homepage": "https://github.com/jasonzissman/chai-desktop#readme",
   "dependencies": {
     "child_process": "^1.0.2",
     "fs": "0.0.1-security",
