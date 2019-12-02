@@ -1,12 +1,22 @@
 const Alexa = require('ask-sdk-core');
 
+// TODO 
+// Make intent to answer "what is my id?"
+// Make intent to "Generate new id and invalidate old ones"
+// Make Launch Intent explain ID options
+// Send pending tasks to Alexa app (do not clear!)
+// Explain that tasks expire in 1 hour
+
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speakOutput = 'Welcome to SmartFeed! Simply instruct Alexa to "tell smartfeed to open XYZ" and I\'ll add it to your feed.';
-        const speakOutput2 = `Welcome back to SmartFeed!`;
+        // Here, check if an Alexa userId is registered with Chai Tea. If not, prompt
+        // the user with a new 6 digit ID that they can write down or see in app.
+        
+        const speakOutput = 'Welcome to Chai Tea! Simply instruct Alexa to "tell Chai Tea to open XYZ" and I\'ll add it to your feed.';
+        const speakOutput2 = `Welcome back to Chai Tea!`;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt(speakOutput2)
@@ -32,8 +42,7 @@ const AddToFeedIntentHandler = {
             dbClient.db("smartfeed").collection("smartfeedItems").insertOne({
                 userId: userId,
                 thingToOpen: thingToOpen,
-                created: new Date().getTime(),
-                read: false
+                created: new Date().getTime()
             }).then(() => {
                 dbClient.close();
             });
@@ -51,7 +60,7 @@ const HelpIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speakOutput = 'Simply instruct Alexa to "tell smartfeed to open XYZ" and I\'ll add it to your feed. You can check your feed with the link that I send to your Alexa app.';
+        const speakOutput = 'Simply instruct Alexa to "tell Chai Tea to open XYZ" and I\'ll add it to your feed. You can check your feed with the link that I send to your Alexa app.';
 
         return handlerInput.responseBuilder
             .speak(speakOutput)

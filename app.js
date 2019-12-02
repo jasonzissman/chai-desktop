@@ -22,11 +22,11 @@ function executeTask(task) {
     return;
   }
   task = task.toLowerCase().trim();
-  if (task.indexOf("crown")>-1 && task.indexOf("netflix")>-1) {
+  if (task.indexOf("crown") > -1 && task.indexOf("netflix") > -1) {
     child_process.exec(process.argv[6].split("--crown=")[1], (error, stdout, stderr) => {
       logger.log(stdout);
     });
-  } else if (task.indexOf("hulu")>-1 && task.indexOf("burgers")>-1) {
+  } else if (task.indexOf("hulu") > -1 && task.indexOf("burgers") > -1) {
     child_process.exec(process.argv[5].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
       logger.log(stdout);
     });
@@ -57,15 +57,22 @@ async function main() {
         allTasksIds.push(MongoObjectId(task._id));
         logger.log(`Executing task ${task.thingToOpen}.`);
         executeTask(task.thingToOpen);
+        task["executedAt"] = new Date().getTime();
       }
 
-      logger.log(`Deleting tasks with ids in ${allTasksIds}.`);
+      logger.log(`Inserting tasks with ids in ${allTasksIds} into archive.`);
+      await dbClient.db("smartfeed").collection("smartfeedItemsArchive").insertMany(tasks);
+      logger.log(`Successfully inserted tasks with ids ${allTasksIds} into archive.`);
+
+      logger.log(`Deleting tasks with ids in ${allTasksIds} from active items.`);
       await dbClient.db("smartfeed").collection("smartfeedItems").deleteMany({
         _id: {
           $in: allTasksIds
         }
       });
-      logger.log(`Successfully deleted tasks with ids ${allTasksIds}.`);
+      logger.log(`Successfully deleted tasks with ids ${allTasksIds} from active items.`);
+
+
     }
 
     dbClient.close();
