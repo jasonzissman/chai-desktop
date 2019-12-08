@@ -1,0 +1,198 @@
+const Alexa = require('ask-sdk-core');
+const MongoHelper = require('helpers/mongo-helper');
+const IdHelper = require('helpers/id-helper');
+
+// TODO 
+// Make Launch Intent explain ID options
+// Make DB connection more efficient, Atlas has recommendations
+// List pending tasks in feed (do not clear!)
+// Explain that tasks expire in 1 hour
+// Finish all TODOs in here
+
+const LaunchRequestHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
+    },
+    async handle(handlerInput) {
+        
+        // Set this to false on handlers with Mongo interaction
+        handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
+        
+        const alexaUserId = handlerInput.requestEnvelope.session.user.userId;
+
+        let smartFeedUserId = await MongoHelper.getSmartFeedUserId(alexaUserId);
+    
+        let speakOutput = ' ';
+        if (!smartFeedUserId || smartFeedUserId.length === 0) {
+            smartFeedUserId = await IdHelper.populateNewSmartFeedIdInDB(alexaUserId);
+            speakOutput += `Welcome to Chai Tea! Before we start, you will need a unique ID. I have created one for you. Your ID is  <prosody rate="x-slow"><say-as interpret-as="characters">${smartFeedUserId}</say-as></prosody>. It will appear in your Alexa app for reference. For more information, say "help".`;
+        } else {
+            speakOutput += `Welcome back! You can tell me anything like \"open XYZ\" and I\'ll add it to your feed. For more information, say "help".`;
+        }
+        
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .withSimpleCard("Chai Tea", `Your new ID is ${smartFeedUserId}.`)
+            .getResponse();
+        
+    
+    }
+};
+const InvalidateAndRegenerateIdIntentHandler ={
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'InvalidateAndRegenerateIdIntent';
+    },
+    async handle(handlerInput) {
+        
+        // TODO - put in prompt to first confirm this action.
+        
+         // Set this to false on handlers with Mongo interaction
+        handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
+        
+        const alexaUserId = handlerInput.requestEnvelope.session.user.userId;
+
+        let oldSmartFeedUserId = await MongoHelper.getSmartFeedUserId(alexaUserId);
+        let newSmartFeedUserId = await IdHelper.populateNewSmartFeedIdInDB(alexaUserId);
+        let speakOutput = '';
+        let cardText = '';
+        
+        if (!oldSmartFeedUserId || oldSmartFeedUserId.length === 0) {
+            speakOutput += `You did not have an ID set up. I have created one for you. Your ID is <prosody rate="x-slow"><say-as interpret-as="characters">${newSmartFeedUserId}</say-as></prosody>. It have sent it to your Alexa app, for reference. For more information, say "help".`;
+            cardText = `Your new ID is ${newSmartFeedUserId}.`
+        } else {
+            await MongoHelper.deleteSmartFeedId(oldSmartFeedUserId);
+            speakOutput = `I have deleted your ID <prosody rate="x-slow"><say-as interpret-as="characters">${oldSmartFeedUserId}</say-as></prosody> and generated a new one, <prosody rate="x-slow"><say-as interpret-as="characters">${newSmartFeedUserId}</say-as></prosody>. I have sent the new id to your Alexa app, for reference.`;
+            cardText = `The ID ${oldSmartFeedUserId} has been removed and your new ID is ${newSmartFeedUserId}.`
+        }
+        
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .withSimpleCard("Chai Tea", cardText)
+            .getResponse();            
+
+    }
+};
+const GetSmartFeedIdIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetSmartFeedIdIntent';
+    },
+    async handle(handlerInput) {
+        
+         // Set this to false on handlers with Mongo interaction
+        handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
+        
+        const alexaUserId = handlerInput.requestEnvelope.session.user.userId;
+
+        let smartFeedUserId = await MongoHelper.getSmartFeedUserId(alexaUserId);
+        let speakOutput = '';
+        
+        if (!smartFeedUserId || smartFeedUserId.length === 0) {
+            smartFeedUserId = await IdHelper.populateNewSmartFeedIdInDB(alexaUserId);
+            speakOutput += `You did not have an ID set up. I have created one for you. Your ID is <prosody rate="x-slow"><say-as interpret-as="characters">${smartFeedUserId}</say-as></prosody>. It have sent it to your Alexa app, for reference. For more information, say "help".`;
+        } else {
+            speakOutput = `Your ID is <prosody rate="x-slow"><say-as interpret-as="characters">${smartFeedUserId}</say-as></prosody>. I have sent it to your Alexa app, for reference.`;
+        }
+        
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .withSimpleCard("Chai Tea", `Your ID is ${smartFeedUserId}.`)
+            .getResponse();            
+
+    }
+};
+const AddToFeedIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AddToFeedIntent';
+    },
+    async handle(handlerInput) {
+        
+         // Set this to false on handlers with Mongo interaction
+        handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
+        
+        const alexaUserId = handlerInput.requestEnvelope.session.user.userId;
+        const thingToOpen = handlerInput.requestEnvelope.request.intent.slots.thingToOpen.value;
+    
+        const smartFeedUserId = await MongoHelper.getSmartFeedUserId(alexaUserId);
+        // TODO - error handle if smartFeedUserId not set up.
+        await MongoHelper.insertSmartFeedItem(smartFeedUserId, thingToOpen);
+        
+        const speakOutput = `OK!`;
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .withSimpleCard("Chai Tea", `You added "${thingToOpen}" to your activity feed.`)
+            .getResponse();            
+    
+    }
+};
+const HelpIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Simply instruct Alexa to "tell Chai Tea to open XYZ" and I\'ll add it to your feed. You can check your feed with the link that I send to your Alexa app.';
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+const CancelAndStopIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && (Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.CancelIntent'
+                || Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.StopIntent');
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Goodbye!';
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .getResponse();
+    }
+};
+const SessionEndedRequestHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'SessionEndedRequest';
+    },
+    handle(handlerInput) {
+        // Any cleanup logic goes here.
+        return handlerInput.responseBuilder.getResponse();
+    }
+};
+
+const ErrorHandler = {
+    canHandle() {
+        return true;
+    },
+    handle(handlerInput, error) {
+        console.log(`~~~~ Error handled: ${error.stack}`);
+        const speakOutput = `Sorry, I am having trouble handling requests. Please try again.`;
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
+// The SkillBuilder acts as the entry point for your skill, routing all request and response
+// payloads to the handlers above. Make sure any new handlers or interceptors you've
+// defined are included below. The order matters - they're processed top to bottom.
+exports.handler = Alexa.SkillBuilders.custom()
+    .addRequestHandlers(
+        LaunchRequestHandler,
+        AddToFeedIntentHandler,
+        GetSmartFeedIdIntentHandler,
+        InvalidateAndRegenerateIdIntentHandler,
+        HelpIntentHandler,
+        CancelAndStopIntentHandler,
+        SessionEndedRequestHandler
+    )
+    .addErrorHandlers(
+        ErrorHandler,
+    )
+    .lambda();
