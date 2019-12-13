@@ -23,26 +23,26 @@ function executeTask(task) {
   }
   task = task.toLowerCase().trim();
 
-  if (task.indexOf("open")) {
+  if (task.indexOf("open") > -1) {
 
     if (task.indexOf("crown") > -1 && task.indexOf("netflix") > -1) {
       child_process.exec(process.argv[6].split("--crown=")[1], (error, stdout, stderr) => {
         logger.log(stdout);
       });
     } else if (task.indexOf("hulu") > -1 && task.indexOf("burgers") > -1) {
-      child_process.exec(process.argv[5].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
+      child_process.exec(process.argv[6].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
         logger.log(stdout);
       });
     } else if (task.indexOf("chrome") > -1) {
-      child_process.exec(process.argv[5].split("--chrome-start=")[1], (error, stdout, stderr) => {
+      child_process.exec(process.argv[8].split("--chrome-start=")[1], (error, stdout, stderr) => {
         logger.log(stdout);
       });
     } 
 
-  } else if (task.indexOf("close")) {
+  } else if (task.indexOf("close") > -1) {
 
     if (task.indexOf("chrome") > -1) {
-      child_process.exec(process.argv[5].split("--chrome-stop=")[1], (error, stdout, stderr) => {
+      child_process.exec(process.argv[7].split("--chrome-stop=")[1], (error, stdout, stderr) => {
         logger.log(stdout);
       });
     }
