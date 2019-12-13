@@ -22,17 +22,35 @@ function executeTask(task) {
     return;
   }
   task = task.toLowerCase().trim();
-  if (task.indexOf("crown") > -1 && task.indexOf("netflix") > -1) {
-    child_process.exec(process.argv[6].split("--crown=")[1], (error, stdout, stderr) => {
-      logger.log(stdout);
-    });
-  } else if (task.indexOf("hulu") > -1 && task.indexOf("burgers") > -1) {
-    child_process.exec(process.argv[5].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
-      logger.log(stdout);
-    });
-  }
-}
 
+  if (task.indexOf("open")) {
+
+    if (task.indexOf("crown") > -1 && task.indexOf("netflix") > -1) {
+      child_process.exec(process.argv[6].split("--crown=")[1], (error, stdout, stderr) => {
+        logger.log(stdout);
+      });
+    } else if (task.indexOf("hulu") > -1 && task.indexOf("burgers") > -1) {
+      child_process.exec(process.argv[5].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
+        logger.log(stdout);
+      });
+    } else if (task.indexOf("chrome") > -1) {
+      child_process.exec(process.argv[5].split("--chrome-start=")[1], (error, stdout, stderr) => {
+        logger.log(stdout);
+      });
+    } 
+
+  } else if (task.indexOf("close")) {
+
+    if (task.indexOf("chrome") > -1) {
+      child_process.exec(process.argv[5].split("--chrome-stop=")[1], (error, stdout, stderr) => {
+        logger.log(stdout);
+      });
+    }
+
+  }
+
+
+}
 let checkInterval = 2000; // ms
 const userId = process.argv[3].split("--userId=")[1];
 const dbConnString = process.argv[2].split("--dbConnString=")[1];
@@ -71,8 +89,6 @@ async function main() {
         }
       });
       logger.log(`Successfully deleted tasks with ids ${allTasksIds} from active items.`);
-
-
     }
 
     dbClient.close();

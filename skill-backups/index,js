@@ -5,9 +5,9 @@ const IdHelper = require('helpers/id-helper');
 // TODO 
 // Make Launch Intent explain ID options
 // Make DB connection more efficient, Atlas has recommendations
-// List pending tasks in feed (do not clear!)
+// New Intent: List pending tasks in feed (do not clear!)
 // Explain that tasks expire in 1 hour
-// Finish all TODOs in here
+// Finish all TODOs in code
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -46,7 +46,7 @@ const InvalidateAndRegenerateIdIntentHandler ={
     async handle(handlerInput) {
         
         // TODO - put in prompt to first confirm this action.
-        
+        // https://stackoverflow.com/questions/49588227/how-to-get-and-use-confirmation-yes-or-no-for-alexa-skill-intent-response
          // Set this to false on handlers with Mongo interaction
         handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
         
@@ -113,16 +113,22 @@ const AddToFeedIntentHandler = {
         handlerInput.requestEnvelope.context.callbackWaitsForEmptyEventLoop = false;
         
         const alexaUserId = handlerInput.requestEnvelope.session.user.userId;
-        const thingToOpen = handlerInput.requestEnvelope.request.intent.slots.thingToOpen.value;
-    
+        let taskToPerform = handlerInput.requestEnvelope.request.intent.slots.thingToOpen.value;
+        if (!taskToPerform || taskToPerform.length === 0) {
+            taskToPerform = "close " + handlerInput.requestEnvelope.request.intent.slots.thingToClose.value;
+        } else {
+            taskToPerform = "open " + taskToPerform;
+        }
+        
+        
         const smartFeedUserId = await MongoHelper.getSmartFeedUserId(alexaUserId);
         // TODO - error handle if smartFeedUserId not set up.
-        await MongoHelper.insertSmartFeedItem(smartFeedUserId, thingToOpen);
+        await MongoHelper.insertSmartFeedItem(smartFeedUserId, taskToPerform);
         
         const speakOutput = `OK!`;
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            .withSimpleCard("Chai Tea", `You added "${thingToOpen}" to your activity feed.`)
+            .withSimpleCard("Chai Tea", `You added "${taskToPerform}" to your activity feed.`)
             .getResponse();            
     
     }
