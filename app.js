@@ -33,12 +33,24 @@ function executeTask(task) {
       child_process.exec(process.argv[6].split("--bobs-burgers=")[1], (error, stdout, stderr) => {
         logger.log(stdout);
       });
+    } else if (task.indexOf("google") > -1 && task.indexOf("maps") > -1) {
+      // https://www.google.com/maps/search/PLACE_TO_SEARCH/
+      if (task.indexOf("search") > -1 && task.indexOf("for") > -1) {
+        let searchTerm = task.split("for")[1].trim();
+        child_process.exec(process.argv[10].split("--google-maps-at=")[1] + ` ${searchTerm}`, (error, stdout, stderr) => {
+          logger.log(stdout);
+        });
+      } else {
+        child_process.exec(process.argv[9].split("--google-maps=")[1], (error, stdout, stderr) => {
+          logger.log(stdout);
+        });
+      }
     } else if (task.indexOf("chrome") > -1) {
       child_process.exec(process.argv[8].split("--chrome-start=")[1], (error, stdout, stderr) => {
         logger.log(stdout);
       });
     } 
-
+    
   } else if (task.indexOf("close") > -1) {
 
     if (task.indexOf("chrome") > -1) {
